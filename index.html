@@ -240,7 +240,7 @@ function loadGoogleMaps(){
     }
     window.__onGMapsReady=()=>{ googleReady=true; svService=new google.maps.StreetViewService(); resolve(); };
     const s=document.createElement("script");
-    s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_API_KEY)}&callback=__onGMapsReady`;
+    s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_API_KEY)}&loading=async&callback=__onGMapsReady`;
     s.onerror=()=>reject(new Error("LOAD_FAILED"));
     document.head.appendChild(s);
   });
