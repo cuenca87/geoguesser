@@ -49,6 +49,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #minimap-wrap.expanded{width:min(94vw,700px);height:min(72vh,600px);bottom:14px;right:14px;cursor:default}
 #minimap{width:100%;height:100%;isolation:isolate}
 #minimap-toggle{position:absolute;top:6px;left:6px;z-index:2;background:rgba(17,17,17,.78);color:#fff;border:none;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:7px}
+#maplayer-toggle{position:absolute;top:6px;right:6px;z-index:2;background:rgba(17,17,17,.78);color:#fff;border:none;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:7px}
 #minimap-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;font-size:12px;font-weight:700;color:#fff;background:rgba(0,0,0,.28);pointer-events:none;z-index:1}
 #minimap-wrap.expanded #minimap-hint{display:none}
 #confirm-bar{position:absolute;left:0;right:0;bottom:0;z-index:3;display:none;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.55));transform:translateY(100%);transition:transform .2s}
@@ -113,6 +114,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
   <div id="minimap-wrap">
     <button id="minimap-toggle">⤢ ampliar</button>
+    <button id="maplayer-toggle">🗺️ mapa</button>
     <div id="minimap"></div>
     <div id="minimap-hint">Toca para ampliar el mapa</div>
     <div id="confirm-bar">
@@ -160,6 +162,8 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch((
 const GOOGLE_MAPS_API_KEY = "AIzaSyCpk8SMRx5ztL5lIWU4q_P9fHZ9-II2F-c";
 
 const PNOA_URL = "https://www.ign.es/wmts/pnoa-ma?service=WMTS&request=GetTile&version=1.0.0&layer=OI.OrthoimageCoverage&style=default&format=image/jpeg&tilematrixset=GoogleMapsCompatible&tilematrix={z}&tilerow={y}&tilecol={x}";
+const STREETMAP_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+const STREETMAP_ATTR = "&copy; OpenStreetMap contributors &copy; CARTO";
 
 const ROUNDS_PER_GAME = 5;
 
@@ -400,12 +404,19 @@ function showPanorama(pano){
 /* ============================================================
    MAPA DE ADIVINANZA (Leaflet)
    ============================================================ */
+let guessBaseLayers=null;
 function initGuessMap(mode){
   const el=document.getElementById("minimap");
   if(guessMap){ guessMap.remove(); el.innerHTML=""; }
   setMinimapExpanded(false);
   guessMap=L.map(el,{zoomControl:false,attributionControl:false}).setView(mode.center, mode.zoom);
-  L.tileLayer(PNOA_URL,{maxZoom:19}).addTo(guessMap);
+  guessBaseLayers={
+    foto: L.tileLayer(PNOA_URL,{maxZoom:19}),
+    mapa: L.tileLayer(STREETMAP_URL,{maxZoom:19,subdomains:"abcd",attribution:STREETMAP_ATTR})
+  };
+  const style=localStorage.getItem("geoguesser_mapstyle")||"foto";
+  guessBaseLayers[style].addTo(guessMap);
+  document.getElementById("maplayer-toggle").textContent = style==="foto" ? "🗺️ mapa" : "🛰️ foto";
   guessMarker=null; currentGuess=null;
   document.getElementById("confirm-bar").classList.remove("show");
   guessMap.on("click", e=>{
@@ -433,6 +444,17 @@ document.getElementById("minimap-toggle").addEventListener("click", e=>{
   e.stopPropagation();
   const wrap=document.getElementById("minimap-wrap");
   setMinimapExpanded(!wrap.classList.contains("expanded"));
+});
+
+document.getElementById("maplayer-toggle").addEventListener("click", e=>{
+  e.stopPropagation();
+  if(!guessBaseLayers) return;
+  const current=localStorage.getItem("geoguesser_mapstyle")||"foto";
+  const next=current==="foto" ? "mapa" : "foto";
+  guessMap.removeLayer(guessBaseLayers[current]);
+  guessBaseLayers[next].addTo(guessMap);
+  localStorage.setItem("geoguesser_mapstyle", next);
+  document.getElementById("maplayer-toggle").textContent = next==="foto" ? "🗺️ mapa" : "🛰️ foto";
 });
 
 /* ============================================================
