@@ -277,16 +277,7 @@ function showPanorama(pano){
   const el=document.getElementById("pano");
   const opts={
     pano: pano.pano,
-    pov:{heading:Math.random()*360, pitch:0},
-    addressControl:false,
-    showRoadLabels:false,
-    linksControl:true,
-    panControl:true,
-    zoomControl:true,
-    fullscreenControl:false,
-    motionTracking:false,
-    motionTrackingControl:false,
-    clickToGo:true
+    pov:{heading:Math.random()*360, pitch:0}
   };
   if(!panorama){ panorama=new google.maps.StreetViewPanorama(el,opts); }
   else{ panorama.setPano(pano.pano); panorama.setPov(opts.pov); }
