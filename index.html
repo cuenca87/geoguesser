@@ -276,7 +276,7 @@ async function nextRoundLocation(modeId){
 function showPanorama(pano){
   const el=document.getElementById("pano");
   const opts={
-    pano: pano.pano,
+    position:{lat:pano.location.latLng.lat(), lng:pano.location.latLng.lng()},
     pov:{heading:Math.random()*360, pitch:0}
   };
   if(!panorama){ panorama=new google.maps.StreetViewPanorama(el,opts); }
