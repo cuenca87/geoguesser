@@ -528,13 +528,15 @@ document.getElementById("btn-guess").addEventListener("click", ()=>{
   showRoundResult(distanceKm,points);
 });
 
+let resultMap=null;
 function showRoundResult(distanceKm,points){
   showScreen("round-result");
   document.getElementById("res-distance").textContent=fmtDist(distanceKm);
   document.getElementById("res-points").textContent=`${points} pts`;
   const el=document.getElementById("result-map");
-  el.innerHTML="";
+  if(resultMap){ resultMap.remove(); el.innerHTML=""; }
   const map=L.map(el,{attributionControl:false}).setView(currentActual,10);
+  resultMap=map;
   L.tileLayer(PNOA_URL,{maxZoom:19}).addTo(map);
   L.marker(currentActual,{icon:dotIcon("#ef4444",18)}).addTo(map);
   L.marker(currentGuess,{icon:dotIcon("#2563eb",18)}).addTo(map);
