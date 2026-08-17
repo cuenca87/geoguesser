@@ -275,12 +275,22 @@ async function nextRoundLocation(modeId){
 
 function showPanorama(pano){
   const el=document.getElementById("pano");
+  const position={lat:pano.location.latLng.lat(), lng:pano.location.latLng.lng()};
+  const pov={heading:Math.random()*360, pitch:0};
   const opts={
-    position:{lat:pano.location.latLng.lat(), lng:pano.location.latLng.lng()},
-    pov:{heading:Math.random()*360, pitch:0}
+    position, pov,
+    addressControl:false,
+    showRoadLabels:false,
+    linksControl:true,
+    panControl:true,
+    zoomControl:true,
+    fullscreenControl:false,
+    motionTracking:false,
+    motionTrackingControl:false,
+    clickToGo:true
   };
   if(!panorama){ panorama=new google.maps.StreetViewPanorama(el,opts); }
-  else{ panorama.setPano(pano.pano); panorama.setPov(opts.pov); }
+  else{ panorama.setPosition(position); panorama.setPov(pov); }
 }
 
 /* ============================================================
